@@ -1,0 +1,20 @@
+# Syllabus2Paper
+
+> Turn any syllabus into a ready-to-print sample question paper. Free sample papers and a knowledge hub on Generative Engine Optimization (GEO).
+
+## Key pages
+- [Sample paper generator](https://syllabus2paper.vercel.app/generator): paste syllabus topics, get a structured question paper.
+- [Sample paper library](https://syllabus2paper.vercel.app/library): free, public sample papers with marks and sections.
+- [GEO knowledge hub](https://syllabus2paper.vercel.app/geo): plain-language guides to Generative Engine Optimization.
+- [FAQ](https://syllabus2paper.vercel.app/faq): common questions about the site.
+
+## Sample papers
+- [Data Structures in Java: Semester 2 Sample Paper](https://syllabus2paper.vercel.app/library/data-structures-java-sem2): A 60-mark sample paper covering arrays, linked lists, stacks, queues, trees and sorting, with answer hints.
+- [Professional Communication and Ethics: Sample Paper](https://syllabus2paper.vercel.app/library/professional-communication-ethics): A 50-mark sample paper on workplace communication, presentations, ethics and interview skills.
+- [Engineering Mathematics 2: Sample Paper](https://syllabus2paper.vercel.app/library/engineering-mathematics-2): An 80-mark sample paper on differential equations, Laplace transforms and vector calculus.
+
+## GEO guides
+- [What is Generative Engine Optimization (GEO)?](https://syllabus2paper.vercel.app/geo/what-is-geo): GEO is the practice of structuring content so AI answer engines can find, understand and cite it.
+- [GEO vs SEO: What changes?](https://syllabus2paper.vercel.app/geo/geo-vs-seo): A side-by-side look at what stays the same and what changes when you optimise for AI answers.
+- [How does structured data help GEO?](https://syllabus2paper.vercel.app/geo/structured-data-for-geo): JSON-LD tells machines exactly what a page is, who wrote it and when it was updated.
+- [What are llms.txt and AI crawler rules?](https://syllabus2paper.vercel.app/geo/llms-txt-and-robots): How robots.txt and llms.txt tell AI crawlers what they may read and where the best content lives.
