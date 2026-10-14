@@ -6,6 +6,7 @@ import PaperDetail from "./pages/PaperDetail";
 import GeoHub from "./pages/GeoHub";
 import GeoArticle from "./pages/GeoArticle";
 import Faq from "./pages/Faq";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { papers } from "./data/papers";
 import { geoArticles } from "./data/geoArticles";
@@ -31,6 +32,7 @@ export const routes = [
         getStaticPaths: () => geoArticles.map((a) => `geo/${a.slug}`),
       },
       { path: "faq", Component: Faq },
+      { path: "login", Component: Login },
       { path: "*", Component: NotFound },
     ],
   },

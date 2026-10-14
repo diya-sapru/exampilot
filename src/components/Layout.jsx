@@ -6,6 +6,7 @@ const nav = [
   { to: "/library", label: "Library" },
   { to: "/geo", label: "GEO hub" },
   { to: "/faq", label: "FAQ" },
+  { to: "/login", label: "Sign In" },
 ];
 
 export default function Layout() {
