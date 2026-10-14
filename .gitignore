@@ -1,4 +1,7 @@
-
 node_modules/
 .env
+.venv/
+__pycache__/
 students.csv
+students_backup.csv
+server_backup.js
