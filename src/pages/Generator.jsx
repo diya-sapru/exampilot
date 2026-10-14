@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import Seo from "../components/Seo";
 import { questionBank } from "../data/questionBank";
+import { useAuth } from "../context/AuthContext";
 
 const PRESET_MARKS = [20, 25, 30, 40, 50, 60, 80, 100];
 const DEFAULT_TOPICS = "Arrays\nLinked lists\nStacks\nQueues\nBinary trees\nSorting algorithms";
@@ -237,6 +238,7 @@ function generatePaperFromBank(settings) {
 }
 
 export default function Generator() {
+  const { user, isLoggedIn } = useAuth();
   const [totalMarksPreset, setTotalMarksPreset] = useState("50");
   const [customMarks, setCustomMarks] = useState("50");
   const isCustomMarks = totalMarksPreset === "custom";
@@ -353,7 +355,7 @@ export default function Generator() {
   function handleSaveDraft() {
     try {
       localStorage.setItem("exampilot_paper_draft", JSON.stringify(paper));
-      showToast("💾 Practice paper saved!");
+      showToast(isLoggedIn ? `💾 Saved to ${user?.name || "Student"}'s test library!` : "💾 Practice paper saved!");
     } catch {
       showToast("💾 Practice paper saved!");
     }
@@ -518,7 +520,9 @@ export default function Generator() {
         {/* Compact Hero Banner */}
         <section className="generator-hero">
           <div className="hero-content">
-            <span className="hero-pill-badge">STUDENT PRACTICE STUDIO</span>
+            <span className="hero-pill-badge">
+              {isLoggedIn ? `🎓 PRACTICING AS: ${user?.name?.toUpperCase()}` : "STUDENT PRACTICE STUDIO"}
+            </span>
             <h1 className="hero-heading">Generate &amp; Solve Practice Papers</h1>
             <p className="hero-subtext">
               Turn your syllabus topics into real exam mock tests. Choose your target marks, solve MCQs interactively, test your knowledge under timed conditions, and check model answers.

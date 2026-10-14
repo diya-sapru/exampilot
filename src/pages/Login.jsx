@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Seo from "../components/Seo";
 import { SITE_NAME } from "../config";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
+  const { login } = useAuth();
   const [userType, setUserType] = useState("student"); // "student" (default) or "educator"
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("alex.student@exampilot.org");
@@ -25,24 +27,49 @@ export default function Login() {
   function handleSubmit(e) {
     e.preventDefault();
     const roleLabel = userType === "student" ? "Student" : "Educator";
+    const namePart = email.split("@")[0].replace(/[._-]/g, " ");
+    const formattedName = namePart
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+
+    login({
+      name: formattedName || "Student",
+      email,
+      role: userType,
+      level: studyLevel,
+    });
+
     setStatusMessage(
       isSignUp
         ? `Account created! Welcome, ${roleLabel}. Redirecting to Practice Studio...`
-        : `Welcome back, ${roleLabel}! Redirecting to Practice Studio...`
+        : `Welcome back, ${formattedName}! Redirecting to Practice Studio...`
     );
     setTimeout(() => {
       navigate("/generator");
-    }, 1100);
+    }, 1000);
   }
 
   function handleDemoLogin() {
     if (userType === "student") {
       setEmail("alex.student@exampilot.org");
       setPassword("studentpractice2026");
-      setStatusMessage("Student Demo Login active! Launching Practice & Mock Test Studio...");
+      login({
+        name: "Alex Rivera",
+        email: "alex.student@exampilot.org",
+        role: "student",
+        level: "College / Undergraduate",
+      });
+      setStatusMessage("Student Demo Login active! Launching Practice Studio as Alex Rivera...");
     } else {
       setEmail("teacher.demo@exampilot.org");
       setPassword("demopassword123");
+      login({
+        name: "Prof. Sarah Miller",
+        email: "teacher.demo@exampilot.org",
+        role: "educator",
+        level: "Computer Science",
+      });
       setStatusMessage("Educator Demo Login active! Launching Studio...");
     }
     setTimeout(() => {

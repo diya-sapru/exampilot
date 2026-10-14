@@ -1,15 +1,41 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { SITE_NAME } from "../config";
+import { AuthProvider, useAuth } from "../context/AuthContext";
 
-const nav = [
-  { to: "/generator", label: "Practice Studio" },
-  { to: "/library", label: "Sample Papers" },
-  { to: "/geo", label: "GEO Hub" },
-  { to: "/faq", label: "FAQ" },
-  { to: "/login", label: "Student Sign In" },
-];
+function HeaderNav() {
+  const { user, logout, isLoggedIn } = useAuth();
 
-export default function Layout() {
+  return (
+    <nav aria-label="Main" className="nav-menu">
+      <NavLink to="/generator">Practice Studio</NavLink>
+      <NavLink to="/library">Sample Papers</NavLink>
+      <NavLink to="/geo">GEO Hub</NavLink>
+      <NavLink to="/faq">FAQ</NavLink>
+
+      {isLoggedIn ? (
+        <div className="nav-user-badge">
+          <span className="user-avatar-tag" title={user.email}>
+            🎓 {user.name || "Student"}
+          </span>
+          <button
+            type="button"
+            className="nav-signout-btn"
+            onClick={logout}
+            title="Sign out of student account"
+          >
+            Sign Out
+          </button>
+        </div>
+      ) : (
+        <NavLink to="/login" className="nav-signin-link">
+          Student Sign In
+        </NavLink>
+      )}
+    </nav>
+  );
+}
+
+function LayoutContent() {
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
@@ -27,16 +53,12 @@ export default function Layout() {
             </span>
             <span className="brand-name">{SITE_NAME}</span>
           </Link>
-          <nav aria-label="Main">
-            {nav.map((n) => (
-              <NavLink key={n.to} to={n.to}>{n.label}</NavLink>
-            ))}
-          </nav>
+          <HeaderNav />
         </div>
       </header>
       <main id="main"><Outlet /></main>
       <footer className="site-footer">
-        <p>{SITE_NAME} is free to use. Built for a GEO hackathon.</p>
+        <p>{SITE_NAME} is free to use. Built for students preparing for exams.</p>
         <p className="footer-links">
           <a href="/llms.txt">llms.txt</a>
           <a href="/sitemap.xml">Sitemap</a>
@@ -44,5 +66,13 @@ export default function Layout() {
         </p>
       </footer>
     </>
+  );
+}
+
+export default function Layout() {
+  return (
+    <AuthProvider>
+      <LayoutContent />
+    </AuthProvider>
   );
 }
