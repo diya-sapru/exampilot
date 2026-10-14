@@ -255,6 +255,14 @@ export default function Generator() {
   const [toast, setToast] = useState("");
   const [error, setError] = useState("");
 
+  // Student Practice & Interactive Solve State
+  const [practiceMode, setPracticeMode] = useState("solve"); // "solve" (interactive) or "print" (clean sheet)
+  const [studentAnswers, setStudentAnswers] = useState({}); // { [qId]: selectedOptIdx }
+  const [studentNotes, setStudentNotes] = useState({}); // { [qId]: string }
+  const [showSolutions, setShowSolutions] = useState({}); // { [qId]: boolean }
+  const [showNotes, setShowNotes] = useState({}); // { [qId]: boolean }
+  const [isCheckingScore, setIsCheckingScore] = useState(false);
+
   // Live Blueprint Preview
   const liveBlueprint = useMemo(() => buildBlueprint(activeMarks), [activeMarks]);
 
@@ -311,7 +319,12 @@ export default function Generator() {
 
     setError("");
     setPaper(result.paper);
-    showToast("✨ Exam paper generated successfully!");
+    setStudentAnswers({});
+    setStudentNotes({});
+    setShowSolutions({});
+    setShowNotes({});
+    setIsCheckingScore(false);
+    showToast("✨ Practice question paper generated!");
   }
 
   function handleShuffle() {
@@ -328,17 +341,43 @@ export default function Generator() {
     });
     if (result.paper) {
       setPaper(result.paper);
-      showToast("🔀 Questions and options shuffled!");
+      setStudentAnswers({});
+      setStudentNotes({});
+      setShowSolutions({});
+      setShowNotes({});
+      setIsCheckingScore(false);
+      showToast("🔀 New randomized practice set generated!");
     }
   }
 
   function handleSaveDraft() {
     try {
       localStorage.setItem("exampilot_paper_draft", JSON.stringify(paper));
-      showToast("💾 Draft saved to local storage!");
+      showToast("💾 Practice paper saved!");
     } catch {
-      showToast("💾 Draft saved!");
+      showToast("💾 Practice paper saved!");
     }
+  }
+
+  function handleSelectOption(qId, optIdx) {
+    setStudentAnswers((prev) => ({
+      ...prev,
+      [qId]: optIdx,
+    }));
+  }
+
+  function handleCheckScore() {
+    setIsCheckingScore(true);
+    showToast("MCQ answers checked! Review your score and feedback below.");
+  }
+
+  function handleResetPractice() {
+    setStudentAnswers({});
+    setStudentNotes({});
+    setShowSolutions({});
+    setShowNotes({});
+    setIsCheckingScore(false);
+    showToast("Answers cleared for a fresh practice attempt!");
   }
 
   function handleAddFromBank(q) {
@@ -435,6 +474,19 @@ export default function Generator() {
   const mediumPct = Math.round((mediumCount / totalCount) * 100);
   const hardPct = Math.max(0, 100 - easyPct - mediumPct);
 
+  // MCQ Practice Scoring
+  const secA = paper?.sections?.find((s) => s.id === "sec-a");
+  const mcqQuestions = secA?.qs || [];
+  const totalMcqCount = mcqQuestions.length;
+  const answeredMcqCount = mcqQuestions.filter(
+    (q) => studentAnswers[q.id] !== undefined
+  ).length;
+  const correctCount = mcqQuestions.filter(
+    (q) => studentAnswers[q.id] !== undefined && studentAnswers[q.id] === q.answerIndex
+  ).length;
+  const mcqScorePercent =
+    totalMcqCount > 0 ? Math.round((correctCount / totalMcqCount) * 100) : 0;
+
   // Filter Question Bank
   const filteredBank = questionBank.filter((item) => {
     const matchesSearch =
@@ -451,8 +503,8 @@ export default function Generator() {
   return (
     <>
       <Seo
-        title="Exam Paper Studio"
-        description="ExamPilot compact teacher workspace: Generate curriculum-aligned exam papers with exact mark balances, multiple choice options, and print-ready formatting."
+        title="Student Exam Practice & QP Generator"
+        description="ExamPilot student practice studio: Generate curriculum-aligned mock question papers from your syllabus with exact marks, interactive MCQs, and complete answer keys to prepare for exams."
         path="/generator"
       />
 
@@ -463,13 +515,13 @@ export default function Generator() {
           </div>
         )}
 
-        {/* Compact Hero Banner (Max ~120-130px on desktop) */}
+        {/* Compact Hero Banner */}
         <section className="generator-hero">
           <div className="hero-content">
-            <span className="hero-pill-badge">TEACHER WORKSPACE</span>
-            <h1 className="hero-heading">Exam Paper Studio</h1>
+            <span className="hero-pill-badge">STUDENT PRACTICE STUDIO</span>
+            <h1 className="hero-heading">Generate &amp; Solve Practice Papers</h1>
             <p className="hero-subtext">
-              Configure curriculum blueprints, balance cognitive loads, and produce exact-mark print-ready exam papers with verifiable answer keys.
+              Turn your syllabus topics into real exam mock tests. Choose your target marks, solve MCQs interactively, test your knowledge under timed conditions, and check model answers.
             </p>
           </div>
         </section>
@@ -480,8 +532,8 @@ export default function Generator() {
           <aside className="generator-settings-col no-print" aria-label="Paper Configuration">
             <div className="panel-card settings-card">
               <div className="card-header">
-                <h2>Paper Settings</h2>
-                <span className="card-badge">Blueprint</span>
+                <h2>Practice Paper Setup</h2>
+                <span className="card-badge">Mock Blueprint</span>
               </div>
 
               <form onSubmit={handleGenerate} className="settings-form">
@@ -612,22 +664,63 @@ export default function Generator() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                   </svg>
-                  Generate Paper ({activeMarks} Marks)
+                  Generate Practice Paper ({activeMarks} Marks)
                 </button>
               </form>
             </div>
           </aside>
 
-          {/* Column 2: Paper Preview (Center, Widest Flexible Panel) */}
-          <main className="generator-preview-col" aria-label="Paper Preview">
+          {/* Column 2: Paper Preview & Student Practice Studio (Center, Widest Flexible Panel) */}
+          <main className="generator-preview-col" aria-label="Paper Preview & Practice Studio">
             <div className="panel-card preview-card">
+              {/* Practice & Solve Mode Switcher Toolbar */}
+              <div className="practice-toolbar no-print">
+                <div className="practice-mode-pills" role="tablist" aria-label="Paper Mode">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={practiceMode === "solve"}
+                    className={`practice-tab-pill ${practiceMode === "solve" ? "active" : ""}`}
+                    onClick={() => setPracticeMode("solve")}
+                    title="Solve questions interactively, select options, and check answers"
+                  >
+                    <span className="pill-icon">✍️</span> Solve &amp; Practice Mode
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={practiceMode === "print"}
+                    className={`practice-tab-pill ${practiceMode === "print" ? "active" : ""}`}
+                    onClick={() => setPracticeMode("print")}
+                    title="Clean exam paper format ready to print or view as official sheet"
+                  >
+                    <span className="pill-icon">📄</span> Exam Paper Sheet
+                  </button>
+                </div>
+
+                {practiceMode === "solve" && paper && totalMcqCount > 0 && (
+                  <div className="practice-quick-actions">
+                    <span className="practice-answered-count">
+                      Answered: {answeredMcqCount}/{totalMcqCount} MCQs
+                    </span>
+                    <button
+                      type="button"
+                      className={`btn btn-sm ${isCheckingScore ? "btn-secondary" : "btn-navy"}`}
+                      onClick={handleCheckScore}
+                    >
+                      {isCheckingScore ? "✓ Evaluated" : "Check My Answers"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* Scrollable Print Sheet Area */}
               <div className="preview-scroll-container">
                 <article className="exam-sheet" aria-live="polite">
                   {paper ? (
                     <>
                       <header className="exam-sheet-head">
-                        <div className="exam-school-mark">EXAMPILOT ACADEMIC EVALUATION SYSTEM</div>
+                        <div className="exam-school-mark">EXAMPILOT STUDENT MOCK TEST &amp; PRACTICE PAPER</div>
                         <h2 className="exam-sheet-title">{paper.title}</h2>
                         <div className="exam-sheet-subtitle">
                           <span>{paper.subject}</span> &bull; <span>{paper.grade}</span>
@@ -653,6 +746,31 @@ export default function Generator() {
                         </div>
                       </header>
 
+                      {/* Interactive Practice Score Banner */}
+                      {practiceMode === "solve" && isCheckingScore && totalMcqCount > 0 && (
+                        <div className="practice-score-banner no-print" role="region" aria-label="Practice Score">
+                          <div className="score-badge-circle">{mcqScorePercent}%</div>
+                          <div className="score-details">
+                            <h4>MCQ Practice Score: {correctCount} of {totalMcqCount} Correct</h4>
+                            <p>
+                              {mcqScorePercent >= 80
+                                ? "🌟 Outstanding preparation! You are well-prepared on these syllabus topics."
+                                : mcqScorePercent >= 50
+                                ? "👍 Good attempt! Review the questions marked in red below to strengthen your concepts."
+                                : "💡 Keep practicing! Review the model solutions below and re-test to master this syllabus."}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-secondary"
+                            onClick={handleResetPractice}
+                            title="Reset answers to practice again"
+                          >
+                            Reset &amp; Retry
+                          </button>
+                        </div>
+                      )}
+
                       <div className="exam-sheet-body">
                         {paper.sections.map((section, sIdx) => (
                           <section key={section.id || sIdx} className="exam-sheet-section">
@@ -669,15 +787,101 @@ export default function Generator() {
 
                                     {/* 2x2 Grid for Multiple Choice Options */}
                                     {q.options && q.options.length > 0 && (
-                                      <div className="mcq-options-grid">
-                                        {q.options.map((opt, optIdx) => (
-                                          <div key={optIdx} className="mcq-option">
-                                            <span className="opt-letter">
-                                              {["A", "B", "C", "D"][optIdx]})
-                                            </span>
-                                            <span className="opt-text">{opt}</span>
+                                      <div className={`mcq-options-grid ${practiceMode === "solve" ? "interactive-grid" : ""}`}>
+                                        {q.options.map((opt, optIdx) => {
+                                          const isSelected = studentAnswers[q.id] === optIdx;
+                                          const isCorrect = q.answerIndex === optIdx;
+                                          const isEvaluated = isCheckingScore || showAnswerKey;
+
+                                          let optClass = "mcq-option";
+                                          if (practiceMode === "solve") {
+                                            optClass += " clickable";
+                                            if (isSelected) optClass += " selected";
+                                            if (isEvaluated) {
+                                              if (isCorrect) optClass += " correct-choice";
+                                              else if (isSelected && !isCorrect) optClass += " incorrect-choice";
+                                            }
+                                          }
+
+                                          return (
+                                            <div
+                                              key={optIdx}
+                                              className={optClass}
+                                              onClick={() =>
+                                                practiceMode === "solve" && handleSelectOption(q.id, optIdx)
+                                              }
+                                              role={practiceMode === "solve" ? "button" : undefined}
+                                              tabIndex={practiceMode === "solve" ? 0 : undefined}
+                                              onKeyDown={(e) => {
+                                                if (practiceMode === "solve" && (e.key === "Enter" || e.key === " ")) {
+                                                  e.preventDefault();
+                                                  handleSelectOption(q.id, optIdx);
+                                                }
+                                              }}
+                                              aria-pressed={practiceMode === "solve" ? isSelected : undefined}
+                                            >
+                                              <span className="opt-letter">
+                                                {["A", "B", "C", "D"][optIdx]})
+                                              </span>
+                                              <span className="opt-text">{opt}</span>
+                                              {isEvaluated && isCorrect && (
+                                                <span className="opt-tag tag-correct no-print">✓ Correct</span>
+                                              )}
+                                              {isEvaluated && isSelected && !isCorrect && (
+                                                <span className="opt-tag tag-wrong no-print">✗ Your Choice</span>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+
+                                    {/* Practice tools for Short and Long Answer questions */}
+                                    {practiceMode === "solve" && (!q.options || q.options.length === 0) && (
+                                      <div className="practice-question-actions no-print">
+                                        <div className="practice-buttons-row">
+                                          <button
+                                            type="button"
+                                            className={`btn-solution-toggle ${showSolutions[q.id] ? "active" : ""}`}
+                                            onClick={() =>
+                                              setShowSolutions((prev) => ({ ...prev, [q.id]: !prev[q.id] }))
+                                            }
+                                          >
+                                            {showSolutions[q.id] ? "🙈 Hide Model Solution" : "💡 Reveal Model Solution & Rubric"}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            className={`btn-scratchpad-toggle ${showNotes[q.id] ? "active" : ""}`}
+                                            onClick={() =>
+                                              setShowNotes((prev) => ({ ...prev, [q.id]: !prev[q.id] }))
+                                            }
+                                          >
+                                            {showNotes[q.id] ? "✏️ Close Scratchpad" : "✍️ Practice Scratchpad"}
+                                          </button>
+                                        </div>
+
+                                        {showNotes[q.id] && (
+                                          <div className="practice-scratchpad-area">
+                                            <textarea
+                                              rows={3}
+                                              placeholder="Practice drafting your answer here before revealing the model solution..."
+                                              value={studentNotes[q.id] || ""}
+                                              onChange={(e) =>
+                                                setStudentNotes((prev) => ({ ...prev, [q.id]: e.target.value }))
+                                              }
+                                            />
                                           </div>
-                                        ))}
+                                        )}
+
+                                        {(showSolutions[q.id] || showAnswerKey) && (
+                                          <div className="practice-model-answer-box">
+                                            <div className="pma-head">
+                                              <span className="pma-badge">Model Solution ({q.marks} Marks)</span>
+                                              {q.topic && <span className="pma-topic">Topic: {q.topic}</span>}
+                                            </div>
+                                            <p className="pma-content">{q.answer || "Model solution based on syllabus."}</p>
+                                          </div>
+                                        )}
                                       </div>
                                     )}
 
@@ -695,12 +899,12 @@ export default function Generator() {
                         ))}
                       </div>
 
-                      {/* Printable Answer Key (Toggled or in separate print block) */}
+                      {/* Printable Answer Key & Model Solutions */}
                       {showAnswerKey && (
                         <div className="answer-key-section">
                           <div className="exam-sheet-rule"></div>
-                          <h3 className="answer-key-title">Official Answer Key & Evaluation Rubric</h3>
-                          <p className="answer-key-note">Confidential &bull; Prepared by ExamPilot</p>
+                          <h3 className="answer-key-title">Official Model Solutions &amp; Evaluation Rubric</h3>
+                          <p className="answer-key-note">Complete self-study guide &bull; Generated by ExamPilot</p>
                           <div className="answer-key-grid">
                             {paper.sections.flatMap((s) => s.qs).map((q, idx) => (
                               <div key={idx} className="ak-row">
@@ -726,7 +930,7 @@ export default function Generator() {
                   type="button"
                   className="btn btn-secondary"
                   onClick={handleShuffle}
-                  title="Shuffle questions and MCQ options"
+                  title="Shuffle questions for fresh practice"
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="16 3 21 3 21 8"></polyline>
@@ -735,42 +939,45 @@ export default function Generator() {
                     <line x1="15" y1="15" x2="21" y2="21"></line>
                     <line x1="4" y1="4" x2="9" y2="9"></line>
                   </svg>
-                  Shuffle
+                  Shuffle Test
                 </button>
 
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={handleSaveDraft}
-                  title="Save current exam paper as draft"
+                  title="Save current practice paper"
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                     <polyline points="17 21 17 13 7 13 7 21"></polyline>
                     <polyline points="7 3 7 8 15 8"></polyline>
                   </svg>
-                  Save Draft
+                  Save Test
                 </button>
 
                 <button
                   type="button"
                   className={`btn ${showAnswerKey ? "btn-primary" : "btn-secondary"}`}
-                  onClick={() => setShowAnswerKey(!showAnswerKey)}
-                  title="Toggle Answer Key"
+                  onClick={() => {
+                    setShowAnswerKey(!showAnswerKey);
+                    if (!showAnswerKey) setIsCheckingScore(true);
+                  }}
+                  title="Toggle Full Answer Key & Model Solutions"
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 2l-2 2m-6 6l7-7-3-3-7 7v3h3z"></path>
                     <path d="M3 21l6-6"></path>
                     <circle cx="7.5" cy="16.5" r="4.5"></circle>
                   </svg>
-                  {showAnswerKey ? "Hide Answers" : "Answer Key"}
+                  {showAnswerKey ? "Hide Solutions" : "Model Solutions"}
                 </button>
 
                 <button
                   type="button"
                   className="btn btn-navy"
                   onClick={() => window.print()}
-                  title="Export paper directly to PDF"
+                  title="Print mock paper or save to PDF"
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -779,21 +986,7 @@ export default function Generator() {
                     <line x1="9" y1="15" x2="12" y2="18"></line>
                     <line x1="15" y1="15" x2="12" y2="18"></line>
                   </svg>
-                  Export PDF
-                </button>
-
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => window.print()}
-                  title="Print paper"
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                    <rect x="6" y="14" width="12" height="8"></rect>
-                  </svg>
-                  Print
+                  Print Mock Test
                 </button>
               </div>
 

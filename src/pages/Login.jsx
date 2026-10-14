@@ -4,26 +4,47 @@ import Seo from "../components/Seo";
 import { SITE_NAME } from "../config";
 
 export default function Login() {
+  const [userType, setUserType] = useState("student"); // "student" (default) or "educator"
   const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState("sarah.miller@oakridge.edu");
+  const [email, setEmail] = useState("alex.student@exampilot.org");
   const [password, setPassword] = useState("••••••••••••");
   const [rememberMe, setRememberMe] = useState(true);
-  const [role, setRole] = useState("Educator / Teacher");
+  const [studyLevel, setStudyLevel] = useState("College / Undergraduate");
   const [statusMessage, setStatusMessage] = useState("");
   const navigate = useNavigate();
 
+  function handleUserTypeChange(type) {
+    setUserType(type);
+    if (type === "student") {
+      setEmail("alex.student@exampilot.org");
+    } else {
+      setEmail("sarah.miller@oakridge.edu");
+    }
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
-    setStatusMessage(isSignUp ? "Account created successfully! Redirecting..." : "Welcome back, Educator! Redirecting to Generator...");
+    const roleLabel = userType === "student" ? "Student" : "Educator";
+    setStatusMessage(
+      isSignUp
+        ? `Account created! Welcome, ${roleLabel}. Redirecting to Practice Studio...`
+        : `Welcome back, ${roleLabel}! Redirecting to Practice Studio...`
+    );
     setTimeout(() => {
       navigate("/generator");
-    }, 1200);
+    }, 1100);
   }
 
   function handleDemoLogin() {
-    setEmail("teacher.demo@exampilot.org");
-    setPassword("demopassword123");
-    setStatusMessage("Quick Demo Login active! Launching Exam Studio...");
+    if (userType === "student") {
+      setEmail("alex.student@exampilot.org");
+      setPassword("studentpractice2026");
+      setStatusMessage("Student Demo Login active! Launching Practice & Mock Test Studio...");
+    } else {
+      setEmail("teacher.demo@exampilot.org");
+      setPassword("demopassword123");
+      setStatusMessage("Educator Demo Login active! Launching Studio...");
+    }
     setTimeout(() => {
       navigate("/generator");
     }, 900);
@@ -32,8 +53,8 @@ export default function Login() {
   return (
     <>
       <Seo
-        title="Teacher & Educator Sign In"
-        description="Sign in to ExamPilot to manage question banks, syllabus blueprints, and export print-ready examination papers."
+        title={userType === "student" ? "Student Practice Sign In" : "Educator Sign In"}
+        description="Sign in to ExamPilot to generate syllabus mock tests, solve practice question papers, track preparation scores, and check model solutions."
         path="/login"
       />
 
@@ -52,16 +73,50 @@ export default function Login() {
               </span>
               <span className="login-brand-name">{SITE_NAME}</span>
             </Link>
-            <span className="login-badge-pill">TEACHER PORTAL</span>
+            <span className="login-badge-pill">
+              {userType === "student" ? "STUDENT PORTAL" : "EDUCATOR PORTAL"}
+            </span>
+          </div>
+
+          {/* Persona / Role Selector Tabs */}
+          <div className="login-role-tabs" role="tablist" aria-label="Select Account Type">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={userType === "student"}
+              className={`role-tab-btn ${userType === "student" ? "active" : ""}`}
+              onClick={() => handleUserTypeChange("student")}
+            >
+              🎓 Student (Exam Practice)
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={userType === "educator"}
+              className={`role-tab-btn ${userType === "educator" ? "active" : ""}`}
+              onClick={() => handleUserTypeChange("educator")}
+            >
+              👨‍🏫 Educator
+            </button>
           </div>
 
           <h1 className="login-title">
-            {isSignUp ? "Create Educator Account" : "Educator Workspace Sign In"}
+            {userType === "student"
+              ? isSignUp
+                ? "Create Student Practice Account"
+                : "Student Exam Practice Sign In"
+              : isSignUp
+                ? "Create Educator Account"
+                : "Educator Sign In"}
           </h1>
           <p className="login-subtext">
-            {isSignUp
-              ? "Join educators building syllabus blueprints and custom examination sheets."
-              : "Access your saved drafts, customized question banks, and evaluation rubrics."}
+            {userType === "student"
+              ? isSignUp
+                ? "Join thousands of students generating syllabus mock tests, solving questions, and preparing for exams."
+                : "Access your generated practice tests, solve mock question papers, and check answers with detailed rubrics."
+              : isSignUp
+                ? "Build curriculum blueprints and export examination sheets."
+                : "Access your saved papers and evaluation rubrics."}
           </p>
 
           {statusMessage && (
@@ -73,30 +128,45 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="login-form">
             {isSignUp && (
               <div className="login-field-group">
-                <label htmlFor="login-role">Teaching Role / Subject</label>
+                <label htmlFor="login-level">
+                  {userType === "student" ? "Academic Level / Target Exam" : "Teaching Department"}
+                </label>
                 <select
-                  id="login-role"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
+                  id="login-level"
+                  value={studyLevel}
+                  onChange={(e) => setStudyLevel(e.target.value)}
                 >
-                  <option value="Computer Science / IT">Computer Science / IT</option>
-                  <option value="Mathematics">Mathematics</option>
-                  <option value="Physics / Chemistry">Physics / Chemistry</option>
-                  <option value="Humanities & Languages">Humanities & Languages</option>
-                  <option value="School Department Head">School Department Head</option>
+                  {userType === "student" ? (
+                    <>
+                      <option value="College / Undergraduate">College / Undergraduate (B.Tech, B.Sc, BCA)</option>
+                      <option value="Grade 12 / High School">Grade 12 / High School (Senior Secondary)</option>
+                      <option value="Grade 10 / Secondary">Grade 10 / Secondary Board</option>
+                      <option value="Competitive Exam (GATE / JEE / GRE)">Competitive Exam (GATE, JEE, GRE, etc.)</option>
+                      <option value="Postgraduate / Master's">Postgraduate / Master&apos;s</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="Computer Science / IT">Computer Science / IT</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Physics / Chemistry">Physics / Chemistry</option>
+                      <option value="Humanities & Languages">Humanities & Languages</option>
+                    </>
+                  )}
                 </select>
               </div>
             )}
 
             <div className="login-field-group">
-              <label htmlFor="login-email">Academic Email</label>
+              <label htmlFor="login-email">
+                {userType === "student" ? "Student Email or Username" : "Academic Email"}
+              </label>
               <input
                 id="login-email"
-                type="email"
+                type="text"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@school.edu"
+                placeholder={userType === "student" ? "alex.student@university.edu" : "name@school.edu"}
               />
             </div>
 
@@ -104,7 +174,14 @@ export default function Login() {
               <div className="login-password-label-row">
                 <label htmlFor="login-password">Password</label>
                 {!isSignUp && (
-                  <a href="#forgot" onClick={(e) => { e.preventDefault(); alert("Password reset link sent to your academic email."); }} className="forgot-link">
+                  <a
+                    href="#forgot"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      alert("Password reset instructions sent to your registered email.");
+                    }}
+                    className="forgot-link"
+                  >
                     Forgot password?
                   </a>
                 )}
@@ -131,14 +208,20 @@ export default function Login() {
             </div>
 
             <button type="submit" className="btn btn-navy login-submit-btn">
-              {isSignUp ? "Create Account & Start" : "Sign In to Studio"}
+              {isSignUp
+                ? userType === "student"
+                  ? "Create Free Student Account"
+                  : "Create Educator Account"
+                : userType === "student"
+                  ? "Sign In to Practice Studio"
+                  : "Sign In as Educator"}
             </button>
 
             <button
               type="button"
               className="btn btn-secondary login-demo-btn"
               onClick={handleDemoLogin}
-              title="One-click demo sign in"
+              title="One-click demo access"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -146,23 +229,25 @@ export default function Login() {
                 <line x1="20" y1="8" x2="20" y2="14"></line>
                 <line x1="23" y1="11" x2="17" y2="11"></line>
               </svg>
-              Quick Demo Login (Teacher Access)
+              {userType === "student"
+                ? "Quick Demo Login (Student Practice Access)"
+                : "Quick Demo Login (Educator Access)"}
             </button>
           </form>
 
           <div className="login-footer-switch">
             {isSignUp ? (
               <p>
-                Already have an educator account?{" "}
+                Already have an account?{" "}
                 <button type="button" className="text-button" onClick={() => setIsSignUp(false)}>
                   Sign In
                 </button>
               </p>
             ) : (
               <p>
-                New to ExamPilot?{" "}
+                New student preparing for exams?{" "}
                 <button type="button" className="text-button" onClick={() => setIsSignUp(true)}>
-                  Create free account
+                  Create free practice account
                 </button>
               </p>
             )}

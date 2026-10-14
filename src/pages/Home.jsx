@@ -25,28 +25,29 @@ export default function Home() {
   return (
     <>
       <Seo
-        title={SITE_NAME}
-        description="Paste your syllabus topics and get a structured sample question paper. Free papers and a guide to Generative Engine Optimization (GEO)."
+        title={`${SITE_NAME} - Student Practice & Question Paper Generator`}
+        description="Paste your syllabus topics and instantly generate mock exam papers with MCQs, mark distributions, and complete answer keys to solve and practice for exams."
         path="/"
         jsonLd={jsonLd}
       />
 
       <section className="hero">
         <div className="hero-copy">
-          <h1>Paste a syllabus. Get an exam paper.</h1>
+          <h1>Paste your syllabus. Generate mock papers to solve &amp; practice.</h1>
           <p className="lede">
-            {SITE_NAME} is a free tool that turns a list of syllabus topics into a
-            sectioned sample question paper with marks, ready to print.
+            {SITE_NAME} is a free exam preparation studio for students. Turn your syllabus
+            topics into balanced mock tests with MCQs, short answers, and instant answer keys
+            to self-evaluate and score higher in your exams.
           </p>
           <div className="actions">
-            <Link className="btn primary" to="/generator">Generate a paper</Link>
-            <Link className="btn" to="/library">Browse sample papers</Link>
+            <Link className="btn primary" to="/generator">Start Practice Test</Link>
+            <Link className="btn" to="/library">Browse Sample Papers</Link>
           </div>
         </div>
 
-        <div className="sheet" aria-label="Example of a generated paper">
+        <div className="sheet" aria-label="Example of a generated practice paper">
           <div className="sheet-head">
-            <strong>Data Structures: Sample Paper</strong>
+            <strong>Data Structures: Practice Paper</strong>
             <span>60 marks, 2 hours</span>
           </div>
           <p className="sheet-note">From topics: Stacks, Queues, Binary trees</p>
@@ -59,11 +60,11 @@ export default function Home() {
       </section>
 
       <section className="band">
-        <h2>How does ExamPilot work?</h2>
+        <h2>How does ExamPilot help you prepare?</h2>
         <ol className="steps">
-          <li><strong>Paste your topics.</strong> One topic per line from your syllabus.</li>
-          <li><strong>Choose the paper size.</strong> Pick a title and difficulty.</li>
-          <li><strong>Print or save.</strong> Get sections A, B and C with marks.</li>
+          <li><strong>Paste your syllabus topics.</strong> Enter chapters or concepts you need to revise for your exam.</li>
+          <li><strong>Pick your marks &amp; format.</strong> Select 20 to 100 marks with realistic MCQ and descriptive balance.</li>
+          <li><strong>Solve &amp; self-evaluate.</strong> Practice questions interactively, verify answers with model solutions, or print.</li>
         </ol>
       </section>
 

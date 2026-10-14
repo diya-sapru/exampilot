@@ -2,11 +2,11 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import { SITE_NAME } from "../config";
 
 const nav = [
-  { to: "/generator", label: "Generator" },
-  { to: "/library", label: "Library" },
-  { to: "/geo", label: "GEO hub" },
+  { to: "/generator", label: "Practice Studio" },
+  { to: "/library", label: "Sample Papers" },
+  { to: "/geo", label: "GEO Hub" },
   { to: "/faq", label: "FAQ" },
-  { to: "/login", label: "Sign In" },
+  { to: "/login", label: "Student Sign In" },
 ];
 
 export default function Layout() {
